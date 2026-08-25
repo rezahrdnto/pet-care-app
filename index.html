@@ -8,28 +8,30 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
-        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .pet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #fff; }
+        .pet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .pet-info h3 { margin: 0 0 5px 0; font-size: 18px; }
         .pet-info p { margin: 0; font-size: 14px; color: #666; }
         
         /* Tombol */
-        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
+        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit;}
         .btn:hover { background-color: #218838; }
         .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; }
         .btn-cal:hover { background-color: #3367D6; }
         .btn-secondary { background-color: #6c757d; margin-top: 10px; }
         .btn-secondary:hover { background-color: #5a6268; }
+        .btn-delete { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; padding: 0; margin-left: 10px;}
         
         .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
         
-        /* Form Styles */
+        /* Form */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         
-        /* Utility untuk menyembunyikan elemen */
         .hidden { display: none; }
+        .empty-state { text-align: center; color: #888; font-size: 14px; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -41,38 +43,15 @@
     <div id="home-section">
         <h2 class="section-title">Your Pets</h2>
         
-        <div class="pet-card">
-            <div class="pet-header">
-                <div class="pet-info">
-                    <h3>Mochi</h3>
-                    <p>Cat • Persian</p>
-                </div>
-                <span>🟢 Healthy</span>
-            </div>
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Feed+Mochi&details=Routine+cat+feeding+schedule" target="_blank" class="btn btn-cal">
-                📅 Remind in Google Calendar
-            </a>
-        </div>
-
-        <div class="pet-card">
-            <div class="pet-header">
-                <div class="pet-info">
-                    <h3>Main Aquarium</h3>
-                    <p>Fish • Freshwater</p>
-                </div>
-                <span>💧 Check Water</span>
-            </div>
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Change+Aquarium+Water&details=Routine+filter+check+and+water+change" target="_blank" class="btn btn-cal">
-                📅 Remind in Google Calendar
-            </a>
-        </div>
+        <!-- Wadah untuk menampung daftar peliharaan yang akan di-generate oleh JavaScript -->
+        <div id="pet-list-container"></div>
 
         <button class="btn" style="margin-top: 20px;" onclick="showAddForm()">
             + Add Pet / Schedule
         </button>
     </div>
 
-    <!-- HALAMAN FORM TAMBAH (Disembunyikan secara default) -->
+    <!-- HALAMAN FORM TAMBAH -->
     <div id="add-section" class="hidden">
         <h2 class="section-title">Add New Pet</h2>
         
@@ -87,7 +66,7 @@
                 <option value="Cat">Cat</option>
                 <option value="Dog">Dog</option>
                 <option value="Fish">Fish / Aquarium</option>
-                <option value="Reptile">Reptile (Gecko, etc.)</option>
+                <option value="Reptile">Reptile</option>
                 <option value="Other">Other</option>
             </select>
         </div>
@@ -100,11 +79,90 @@
         <button class="btn" onclick="savePet()">💾 Save Pet</button>
         <button class="btn btn-secondary" onclick="showHome()">❌ Cancel</button>
     </div>
-
 </div>
 
-<!-- SCRIPT UNTUK BUKA TUTUP HALAMAN -->
+<!-- SCRIPT LOGIKA APLIKASI -->
 <script>
+    // 1. Cek apakah ada data di Local Storage, kalau kosong, kasih data default
+    let pets = JSON.parse(localStorage.getItem('myPets')) || [
+        { name: 'Mochi', type: 'Cat', breed: 'Persian' },
+        { name: 'Main Aquarium', type: 'Fish', breed: 'Freshwater' }
+    ];
+
+    // 2. Fungsi untuk menampilkan data ke layar
+    function renderPets() {
+        const container = document.getElementById('pet-list-container');
+        container.innerHTML = ''; // Bersihkan layar dulu
+
+        if (pets.length === 0) {
+            container.innerHTML = '<p class="empty-state">No pets added yet. Click the button below to add one!</p>';
+            return;
+        }
+
+        // Loop untuk membuat kartu setiap peliharaan
+        pets.forEach((pet, index) => {
+            const calendarText = encodeURIComponent(`Care for ${pet.name}`);
+            const calendarDetails = encodeURIComponent(`Routine check for ${pet.name} (${pet.type} - ${pet.breed})`);
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarText}&details=${calendarDetails}`;
+
+            const cardHtml = `
+                <div class="pet-card">
+                    <div class="pet-header">
+                        <div class="pet-info">
+                            <h3>${pet.name}</h3>
+                            <p>${pet.type} • ${pet.breed}</p>
+                        </div>
+                        <button class="btn-delete" onclick="deletePet(${index})" title="Delete Pet">❌</button>
+                    </div>
+                    <a href="${calendarUrl}" target="_blank" class="btn btn-cal">
+                        📅 Remind in Google Calendar
+                    </a>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        });
+    }
+
+    // 3. Fungsi untuk menyimpan data baru
+    function savePet() {
+        const nameInput = document.getElementById('petName');
+        const typeInput = document.getElementById('petType');
+        const breedInput = document.getElementById('petBreed');
+
+        if (!nameInput.value) {
+            alert('Please enter a pet name!');
+            return;
+        }
+
+        // Masukkan ke array
+        pets.push({
+            name: nameInput.value,
+            type: typeInput.value,
+            breed: breedInput.value || 'N/A'
+        });
+
+        // Simpan ke memory browser
+        localStorage.setItem('myPets', JSON.stringify(pets));
+
+        // Kosongkan form setelah save
+        nameInput.value = '';
+        breedInput.value = '';
+
+        // Tampilkan layar utama yang sudah diperbarui
+        renderPets();
+        showHome();
+    }
+
+    // 4. Fungsi untuk menghapus data
+    function deletePet(index) {
+        if(confirm('Are you sure you want to delete this pet?')) {
+            pets.splice(index, 1); // Hapus 1 item dari array
+            localStorage.setItem('myPets', JSON.stringify(pets)); // Update memory
+            renderPets(); // Perbarui layar
+        }
+    }
+
+    // Fungsi buka tutup layar
     function showAddForm() {
         document.getElementById('home-section').classList.add('hidden');
         document.getElementById('add-section').classList.remove('hidden');
@@ -115,10 +173,8 @@
         document.getElementById('home-section').classList.remove('hidden');
     }
 
-    function savePet() {
-        alert('Tampilan form sudah jadi! Fitur simpan data permanennya kita bikin di tahap berikutnya.');
-        showHome();
-    }
+    // Jalankan fungsi render saat web pertama kali dibuka
+    window.onload = renderPets;
 </script>
 </body>
 </html>

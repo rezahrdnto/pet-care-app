@@ -84,9 +84,8 @@
 <!-- SCRIPT LOGIKA APLIKASI -->
 <script>
     // 1. Cek apakah ada data di Local Storage, kalau kosong, kasih data default
-    let pets = JSON.parse(localStorage.getItem('myPets')) || [
-        { name: 'Mochi', type: 'Cat', breed: 'Persian' },
-        { name: 'Main Aquarium', type: 'Fish', breed: 'Freshwater' }
+    let pets = JSON.parse(localStorage.getItem('myPets')) || [];
+
     ];
 
     // 2. Fungsi untuk menampilkan data ke layar

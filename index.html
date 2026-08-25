@@ -12,11 +12,24 @@
         .pet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .pet-info h3 { margin: 0 0 5px 0; font-size: 18px; }
         .pet-info p { margin: 0; font-size: 14px; color: #666; }
+        
+        /* Tombol */
         .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
         .btn:hover { background-color: #218838; }
         .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; }
         .btn-cal:hover { background-color: #3367D6; }
+        .btn-secondary { background-color: #6c757d; margin-top: 10px; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        
         .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
+        
+        /* Form Styles */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        
+        /* Utility untuk menyembunyikan elemen */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -24,10 +37,10 @@
 <div class="container">
     <h1>🐾 Pet Care Tracker</h1>
 
+    <!-- HALAMAN UTAMA -->
     <div id="home-section">
         <h2 class="section-title">Your Pets</h2>
         
-        <!-- Cat Card -->
         <div class="pet-card">
             <div class="pet-header">
                 <div class="pet-info">
@@ -36,13 +49,11 @@
                 </div>
                 <span>🟢 Healthy</span>
             </div>
-            <!-- Google Calendar Button -->
             <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Feed+Mochi&details=Routine+cat+feeding+schedule" target="_blank" class="btn btn-cal">
                 📅 Remind in Google Calendar
             </a>
         </div>
 
-        <!-- Aquarium Card -->
         <div class="pet-card">
             <div class="pet-header">
                 <div class="pet-info">
@@ -51,18 +62,63 @@
                 </div>
                 <span>💧 Check Water</span>
             </div>
-            <!-- Google Calendar Button -->
             <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Change+Aquarium+Water&details=Routine+filter+check+and+water+change" target="_blank" class="btn btn-cal">
                 📅 Remind in Google Calendar
             </a>
         </div>
 
-        <button class="btn" style="margin-top: 20px;" onclick="alert('This will open a page to add a new pet or schedule!')">
+        <button class="btn" style="margin-top: 20px;" onclick="showAddForm()">
             + Add Pet / Schedule
         </button>
     </div>
 
+    <!-- HALAMAN FORM TAMBAH (Disembunyikan secara default) -->
+    <div id="add-section" class="hidden">
+        <h2 class="section-title">Add New Pet</h2>
+        
+        <div class="form-group">
+            <label for="petName">Pet Name / Tank Name</label>
+            <input type="text" id="petName" placeholder="e.g., Mochi or Tank 1">
+        </div>
+
+        <div class="form-group">
+            <label for="petType">Pet Type</label>
+            <select id="petType">
+                <option value="Cat">Cat</option>
+                <option value="Dog">Dog</option>
+                <option value="Fish">Fish / Aquarium</option>
+                <option value="Reptile">Reptile (Gecko, etc.)</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="petBreed">Breed / Variant</label>
+            <input type="text" id="petBreed" placeholder="e.g., Persian or Freshwater">
+        </div>
+
+        <button class="btn" onclick="savePet()">💾 Save Pet</button>
+        <button class="btn btn-secondary" onclick="showHome()">❌ Cancel</button>
+    </div>
+
 </div>
 
+<!-- SCRIPT UNTUK BUKA TUTUP HALAMAN -->
+<script>
+    function showAddForm() {
+        document.getElementById('home-section').classList.add('hidden');
+        document.getElementById('add-section').classList.remove('hidden');
+    }
+
+    function showHome() {
+        document.getElementById('add-section').classList.add('hidden');
+        document.getElementById('home-section').classList.remove('hidden');
+    }
+
+    function savePet() {
+        alert('Tampilan form sudah jadi! Fitur simpan data permanennya kita bikin di tahap berikutnya.');
+        showHome();
+    }
+</script>
 </body>
 </html>

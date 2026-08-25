@@ -9,6 +9,12 @@
         .container { max-width: 480px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
         
+        /* Login Screen */
+        #login-section { text-align: center; padding: 40px 20px; }
+        #login-section h2 { margin-bottom: 10px; color: #333; }
+        #login-section p { color: #666; font-size: 14px; margin-bottom: 30px; }
+        .btn-google { background-color: #4285F4; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; width: 100%; justify-content: center; box-sizing: border-box;}
+        
         /* Pet Card & Profile */
         .pet-card { border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 25px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .pet-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
@@ -74,16 +80,39 @@
         
         .age-inputs { display: flex; gap: 5px; }
         .age-inputs input { width: 33%; }
+        
+        /* User Header */
+        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .user-header p { margin: 0; font-size: 14px; color: #555; }
+        .btn-logout { background: none; border: 1px solid #dc3545; color: #dc3545; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Bagian Login -->
+<div class="container" id="login-section">
     <h1>🐾 Pet Guardian Log</h1>
+    <h2>Welcome Back!</h2>
+    <p>Please log in to sync your data securely across all your devices.</p>
+    <button class="btn-google" id="btnLogin">
+        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+    </button>
+</div>
+
+<!-- Bagian Aplikasi Utama -->
+<div class="container hidden" id="app-wrapper">
+    <div class="user-header">
+        <p>Logged in as: <b id="userEmail">...</b></p>
+        <button class="btn-logout" id="btnLogout">Logout</button>
+    </div>
 
     <!-- HOME SECTION -->
     <div id="home-section">
-        <div id="pet-list-container"></div>
+        <h1 style="margin-top:0;">🐾 Pet Guardian Log</h1>
+        <div id="pet-list-container">
+            <p style="text-align:center; color:#888;">Loading data from cloud...</p>
+        </div>
         <button class="btn" style="margin-top: 20px;" onclick="showSection('add-pet-section')">+ Add New Profile</button>
     </div>
 
@@ -116,7 +145,7 @@
         <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
     </div>
 
-    <!-- ADD INHABITANT SECTION (KHUSUS AQUARIUM) -->
+    <!-- ADD INHABITANT SECTION -->
     <div id="add-inhabitant-section" class="hidden">
         <h2 class="section-title">Add Fish / Species</h2>
         <input type="hidden" id="inhabitantPetId">
@@ -183,7 +212,7 @@
             <label>Body Condition Score (1-9)</label>
             <select id="logBCS">
                 <option value="">-- Skip / Unknown --</option>
-                <option value="1">1 - Emaciated (Sangat Kurus)</option>
+                <option value="1">1 - Emaciated</option>
                 <option value="2">2 - Very Thin</option>
                 <option value="3">3 - Thin</option>
                 <option value="4">4 - Ideal</option>
@@ -204,36 +233,93 @@
         <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
         <button id="btnDeleteLog" class="btn btn-danger hidden" onclick="deleteLog()">🗑️ Delete This Record</button>
     </div>
-
 </div>
 
-<script>
-    let pets = JSON.parse(localStorage.getItem('guardianPets')) || [];
+<!-- =======================
+     FIREBASE & APP LOGIC 
+     ======================= -->
+<script type="module">
+    // Import Firebase SDK (V9 Modular)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // KUNCI FIREBASE DARI ANDA
+    const firebaseConfig = {
+        apiKey: "AIzaSyBLTWH8LDSkwMZ96736ggNGTGg_sykcyX0",
+        authDomain: "pet-guardian-log.firebaseapp.com",
+        projectId: "pet-guardian-log",
+        storageBucket: "pet-guardian-log.firebasestorage.app",
+        messagingSenderId: "849272417568",
+        appId: "1:849272417568:web:9c246a7f8fdf5b7e417b45",
+        measurementId: "G-WBR34K42D8"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let pets = [];
     let tempPhotoBase64 = "";
 
-    function updateAddFormLabels() {
-        const type = document.getElementById('petType').value;
-        if(type === 'Aquarium') {
-            document.getElementById('label-petName').innerText = 'Tank Name';
-            document.getElementById('label-petBreed').innerText = 'Water/Setup Type (e.g., Freshwater)';
+    // --- AUTHENTICATION LOGIC ---
+    document.getElementById('btnLogin').addEventListener('click', () => {
+        signInWithPopup(auth, provider).catch(error => alert("Login gagal: " + error.message));
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        signOut(auth);
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // Berhasil Login
+            currentUser = user;
+            document.getElementById('userEmail').innerText = user.email;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            await fetchCloudData();
         } else {
-            document.getElementById('label-petName').innerText = 'Pet Name';
-            document.getElementById('label-petBreed').innerText = 'Breed / Variant';
+            // Belum Login / Logout
+            currentUser = null;
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('app-wrapper').classList.add('hidden');
         }
+    });
+
+    // --- CLOUD SYNC LOGIC ---
+    async function fetchCloudData() {
+        if (!currentUser) return;
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists() && docSnap.data().pets) {
+            pets = docSnap.data().pets;
+        } else {
+            // MIGRASI OTOMATIS: Tarik dari localStorage ke Cloud
+            const localData = localStorage.getItem('guardianPets');
+            if (localData) {
+                pets = JSON.parse(localData);
+                await setDoc(docRef, { pets: pets });
+                localStorage.removeItem('guardianPets'); // Hapus jejak lokal
+            } else {
+                pets = [];
+            }
+        }
+        renderPets();
     }
 
-    function previewPhoto(event, previewId) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            tempPhotoBase64 = e.target.result;
-            document.getElementById(previewId).src = tempPhotoBase64;
-            document.getElementById(previewId).style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+    async function saveToCloud() {
+        if (!currentUser) return;
+        renderPets(); // Update layar langsung (snappy UX)
+        const docRef = doc(db, "users", currentUser.uid);
+        await setDoc(docRef, { pets: pets });
     }
 
+    // --- RENDER UI LOGIC ---
     function formatAge(y, m, w) {
         let parts = [];
         if (y) parts.push(`${y}y`);
@@ -272,7 +358,6 @@
         } else {
             listHtml = `<p style="font-size: 12px; color: #999; margin:0;">No items added.</p>`;
         }
-
         return `
             <div class="checklist-section">
                 <div class="checklist-header">
@@ -289,7 +374,7 @@
         container.innerHTML = ''; 
 
         if (pets.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888;">No tracking data yet. Start building your log!</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888;">No tracking data yet. Click "+ Add New Profile" to start.</p>';
             return;
         }
 
@@ -297,7 +382,6 @@
             const photoSrc = pet.photo ? pet.photo : 'https://via.placeholder.com/70?text=Pet';
             const isAqua = (pet.type === 'Aquarium' || pet.type === 'Fish');
             
-            // Generate Calendar Link
             const calText = encodeURIComponent(`Routine: ${pet.name}`);
             const calDetails = encodeURIComponent(`Checklist & Maintenance for ${pet.type}`);
             const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calText}&details=${calDetails}`;
@@ -319,7 +403,6 @@
                         }
                         metricsContent = `${humanAgeBadge}<span>Age: ${ageStr}</span> | <span>Weight: ${log.weight || '-'}</span> ${bcsHtml}`;
                     }
-
                     logsHtml += `
                         <div class="log-item">
                             <div class="log-header">
@@ -336,7 +419,6 @@
             }
 
             let dynamicSectionsHtml = '';
-            
             if (isAqua) {
                 let inhabList = '';
                 if (pet.inhabitants && pet.inhabitants.length > 0) {
@@ -346,7 +428,6 @@
                 } else {
                     inhabList = `<span style="font-size:12px;color:#999;">Empty tank. Add some species!</span>`;
                 }
-
                 dynamicSectionsHtml += `
                     <div class="inhabitants-section">
                         <div class="checklist-header">
@@ -372,13 +453,10 @@
                         </div>
                         <button class="btn-delete-profile" onclick="deletePet('${pet.id}')" title="Delete Profile">🗑️</button>
                     </div>
-                    
-                    <!-- DUA TOMBOL BERSEBELAHAN (Record & Calendar) -->
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                         <button class="btn btn-outline" style="margin-bottom: 0; flex: 1; font-size: 13px;" onclick="openLogForm('${pet.id}', null)">+ Daily Record</button>
                         <a href="${calUrl}" target="_blank" class="btn" style="background-color: #4285F4; margin-bottom: 0; flex: 1; font-size: 13px; display: flex; align-items: center; justify-content: center; text-decoration: none;">📅 Add Reminder</a>
                     </div>
-                    
                     ${dynamicSectionsHtml}
                     <div class="timeline" style="margin-top: 20px;">
                         <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #444;">Activity & Medical History</h4>
@@ -390,66 +468,40 @@
         });
     }
 
-    // --- FORM LOGIC: INHABITANTS ---
-    function openAddInhabitantForm(petId) {
-        document.getElementById('inhabitantPetId').value = petId;
-        document.getElementById('inhName').value = '';
-        document.getElementById('inhQty').value = '';
-        showSection('add-inhabitant-section');
-    }
-    function saveInhabitant() {
-        const petId = document.getElementById('inhabitantPetId').value;
-        const name = document.getElementById('inhName').value;
-        const qty = document.getElementById('inhQty').value || 1;
-        if (!name) return alert('Masukkan nama spesies!');
-        
-        const pet = pets.find(p => p.id === petId);
-        if (!pet.inhabitants) pet.inhabitants = [];
-        pet.inhabitants.push({ id: Date.now().toString(), name: name, qty: qty });
-        saveData();
-        showSection('home-section');
-    }
-    function deleteInhabitant(petId, inhId) {
-        if(!confirm('Hapus spesies ini?')) return;
-        const pet = pets.find(p => p.id === petId);
-        pet.inhabitants = pet.inhabitants.filter(i => i.id !== inhId);
-        saveData();
-    }
+    // --- WINDOW BINDINGS (Biar HTML bisa manggil JS dari dalam Module) ---
+    window.showSection = function(sectionId) {
+        document.getElementById('home-section').classList.add('hidden');
+        document.getElementById('add-pet-section').classList.add('hidden');
+        document.getElementById('add-inhabitant-section').classList.add('hidden');
+        document.getElementById('add-checklist-section').classList.add('hidden');
+        document.getElementById('add-log-section').classList.add('hidden');
+        document.getElementById(sectionId).classList.remove('hidden');
+    };
 
-    // --- FORM LOGIC: CHECKLIST ---
-    function openAddChecklistForm(petId, category) {
-        document.getElementById('checklistPetId').value = petId;
-        document.getElementById('checklistCategory').value = category;
-        document.getElementById('checklistTaskName').value = '';
-        showSection('add-checklist-section');
-    }
-    function saveChecklist() {
-        const petId = document.getElementById('checklistPetId').value;
-        const category = document.getElementById('checklistCategory').value;
-        const text = document.getElementById('checklistTaskName').value;
-        if (!text) return alert('Masukkan nama tugas!');
+    window.updateAddFormLabels = function() {
+        const type = document.getElementById('petType').value;
+        if(type === 'Aquarium') {
+            document.getElementById('label-petName').innerText = 'Tank Name';
+            document.getElementById('label-petBreed').innerText = 'Water/Setup Type (e.g., Freshwater)';
+        } else {
+            document.getElementById('label-petName').innerText = 'Pet Name';
+            document.getElementById('label-petBreed').innerText = 'Breed / Variant';
+        }
+    };
 
-        const pet = pets.find(p => p.id === petId);
-        if (!pet.checklist) pet.checklist = [];
-        pet.checklist.push({ id: Date.now().toString(), text: text, done: false, category: category });
-        saveData();
-        showSection('home-section');
-    }
-    function toggleChecklist(petId, itemId) {
-        const pet = pets.find(p => p.id === petId);
-        const item = pet.checklist.find(i => i.id === itemId);
-        item.done = !item.done;
-        saveData();
-    }
-    function deleteChecklist(petId, itemId) {
-        if(!confirm('Hapus tugas ini?')) return;
-        const pet = pets.find(p => p.id === petId);
-        pet.checklist = pet.checklist.filter(i => i.id !== itemId);
-        saveData();
-    }
+    window.previewPhoto = function(event, previewId) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            tempPhotoBase64 = e.target.result;
+            document.getElementById(previewId).src = tempPhotoBase64;
+            document.getElementById(previewId).style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    };
 
-    // --- MAIN LOGIC ---
-    function savePet() {
+    window.savePet = function() {
         const name = document.getElementById('petName').value;
         const type = document.getElementById('petType').value;
         const breed = document.getElementById('petBreed').value;
@@ -460,16 +512,17 @@
             photo: tempPhotoBase64, logs: [], checklist: [], inhabitants: []
         });
 
-        saveData();
+        saveToCloud();
+        
         document.getElementById('petName').value = '';
         document.getElementById('petBreed').value = '';
         document.getElementById('newPetPhotoPreview').style.display = 'none';
         document.getElementById('petType').value = 'Cat';
         tempPhotoBase64 = "";
-        showSection('home-section');
-    }
+        window.showSection('home-section');
+    };
 
-    function openLogForm(petId, logId = null) {
+    window.openLogForm = function(petId, logId = null) {
         document.getElementById('activePetId').value = petId;
         document.getElementById('activeLogId').value = logId || '';
         const pet = pets.find(p => p.id === petId);
@@ -509,10 +562,10 @@
             document.getElementById('logNote').value = '';
             document.getElementById('btnDeleteLog').classList.add('hidden');
         }
-        showSection('add-log-section');
-    }
+        window.showSection('add-log-section');
+    };
 
-    function saveLog() {
+    window.saveLog = function() {
         const petId = document.getElementById('activePetId').value;
         const logId = document.getElementById('activeLogId').value;
         const petIndex = pets.findIndex(p => p.id === petId);
@@ -547,40 +600,83 @@
             pets[petIndex].logs.push(newLogData);
         }
 
-        saveData();
-        showSection('home-section');
-    }
+        saveToCloud();
+        window.showSection('home-section');
+    };
 
-    function deleteLog() {
+    window.deleteLog = function() {
         if(!confirm('Are you sure you want to delete this record?')) return;
         const petId = document.getElementById('activePetId').value;
         const logId = document.getElementById('activeLogId').value;
         const petIndex = pets.findIndex(p => p.id === petId);
         pets[petIndex].logs = pets[petIndex].logs.filter(l => l.id !== logId);
-        saveData();
-        showSection('home-section');
-    }
+        saveToCloud();
+        window.showSection('home-section');
+    };
 
-    function deletePet(id) {
-        if(confirm('Delete this profile and ALL its records?')) {
+    window.deletePet = function(id) {
+        if(confirm('Delete this profile and ALL its records permanently from cloud?')) {
             pets = pets.filter(p => p.id !== id);
-            saveData();
+            saveToCloud();
         }
-    }
+    };
 
-    function saveData() { localStorage.setItem('guardianPets', JSON.stringify(pets)); renderPets(); }
-    
-    function showSection(sectionId) {
-        document.getElementById('home-section').classList.add('hidden');
-        document.getElementById('add-pet-section').classList.add('hidden');
-        document.getElementById('add-inhabitant-section').classList.add('hidden');
-        document.getElementById('add-checklist-section').classList.add('hidden');
-        document.getElementById('add-log-section').classList.add('hidden');
-        
-        document.getElementById(sectionId).classList.remove('hidden');
-    }
+    // Checklist bindings
+    window.openAddChecklistForm = function(petId, category) {
+        document.getElementById('checklistPetId').value = petId;
+        document.getElementById('checklistCategory').value = category;
+        document.getElementById('checklistTaskName').value = '';
+        window.showSection('add-checklist-section');
+    };
+    window.saveChecklist = function() {
+        const petId = document.getElementById('checklistPetId').value;
+        const category = document.getElementById('checklistCategory').value;
+        const text = document.getElementById('checklistTaskName').value;
+        if (!text) return alert('Masukkan nama tugas!');
+        const pet = pets.find(p => p.id === petId);
+        if (!pet.checklist) pet.checklist = [];
+        pet.checklist.push({ id: Date.now().toString(), text: text, done: false, category: category });
+        saveToCloud();
+        window.showSection('home-section');
+    };
+    window.toggleChecklist = function(petId, itemId) {
+        const pet = pets.find(p => p.id === petId);
+        const item = pet.checklist.find(i => i.id === itemId);
+        item.done = !item.done;
+        saveToCloud();
+    };
+    window.deleteChecklist = function(petId, itemId) {
+        if(!confirm('Hapus tugas ini?')) return;
+        const pet = pets.find(p => p.id === petId);
+        pet.checklist = pet.checklist.filter(i => i.id !== itemId);
+        saveToCloud();
+    };
 
-    window.onload = renderPets;
+    // Inhabitant bindings
+    window.openAddInhabitantForm = function(petId) {
+        document.getElementById('inhabitantPetId').value = petId;
+        document.getElementById('inhName').value = '';
+        document.getElementById('inhQty').value = '';
+        window.showSection('add-inhabitant-section');
+    };
+    window.saveInhabitant = function() {
+        const petId = document.getElementById('inhabitantPetId').value;
+        const name = document.getElementById('inhName').value;
+        const qty = document.getElementById('inhQty').value || 1;
+        if (!name) return alert('Masukkan nama spesies!');
+        const pet = pets.find(p => p.id === petId);
+        if (!pet.inhabitants) pet.inhabitants = [];
+        pet.inhabitants.push({ id: Date.now().toString(), name: name, qty: qty });
+        saveToCloud();
+        window.showSection('home-section');
+    };
+    window.deleteInhabitant = function(petId, inhId) {
+        if(!confirm('Hapus spesies ini?')) return;
+        const pet = pets.find(p => p.id === petId);
+        pet.inhabitants = pet.inhabitants.filter(i => i.id !== inhId);
+        saveToCloud();
+    };
+
 </script>
 </body>
 </html>

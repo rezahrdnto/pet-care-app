@@ -21,9 +21,23 @@
         .timeline { margin-top: 15px; padding-left: 10px; border-left: 2px solid #e9ecef; }
         .log-item { position: relative; padding-left: 15px; margin-bottom: 15px; }
         .log-item::before { content: ''; position: absolute; left: -15px; top: 0; width: 10px; height: 10px; background: #28a745; border-radius: 50%; border: 2px solid #fff; }
-        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .log-date { font-size: 12px; color: #888; font-weight: bold; }
-        .btn-edit-log { background: none; border: none; color: #007bff; font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline; }
+        
+        /* TOMBOL EDIT BARU */
+        .btn-edit-log { 
+            background-color: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            color: #495057; 
+            font-size: 11px; 
+            font-weight: 600;
+            cursor: pointer; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            transition: background-color 0.2s;
+        }
+        .btn-edit-log:hover { background-color: #e2e6ea; }
         
         .log-metrics { font-size: 13px; font-weight: 600; color: #495057; display: block; margin-bottom: 4px; }
         .log-note { font-size: 13px; color: #555; margin: 0; line-height: 1.4; background: #f8f9fa; padding: 8px; border-radius: 6px; }

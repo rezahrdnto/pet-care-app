@@ -3,27 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pet Care Tracker</title>
+    <title>Pet Care & Medical Tracker</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 450px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
         
-        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #fff; }
+        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #fff; }
         .pet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .pet-info h3 { margin: 0 0 5px 0; font-size: 18px; }
         .pet-info p { margin: 0; font-size: 14px; color: #666; }
+        .age-badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px;}
+        
+        /* Kartu Edukasi / Guardian Tips */
+        .tips-card { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 13px; }
+        .tips-card h4 { margin: 0 0 5px 0; color: #856404; font-size: 14px; }
         
         /* Tombol */
-        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit;}
+        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit; font-weight: bold;}
         .btn:hover { background-color: #218838; }
-        .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; }
+        .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; font-weight: normal;}
         .btn-cal:hover { background-color: #3367D6; }
+        .btn-med { background-color: #6f42c1; margin-top: 10px; font-size: 14px; padding: 10px; font-weight: normal;}
+        .btn-med:hover { background-color: #59339d; }
         .btn-secondary { background-color: #6c757d; margin-top: 10px; }
-        .btn-secondary:hover { background-color: #5a6268; }
+        
         .btn-delete { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; padding: 0; margin-left: 10px;}
         
-        .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
+        .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
         
         /* Form */
         .form-group { margin-bottom: 15px; }
@@ -31,49 +38,45 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         
         .hidden { display: none; }
-        .empty-state { text-align: center; color: #888; font-size: 14px; margin: 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🐾 Pet Care Tracker</h1>
+    <h1>🐾 Pet Guardian App</h1>
 
-    <!-- HALAMAN UTAMA -->
     <div id="home-section">
         <h2 class="section-title">Your Pets</h2>
-        
-        <!-- Wadah untuk menampung daftar peliharaan yang akan di-generate oleh JavaScript -->
         <div id="pet-list-container"></div>
-
-        <button class="btn" style="margin-top: 20px;" onclick="showAddForm()">
-            + Add Pet / Schedule
-        </button>
+        <button class="btn" style="margin-top: 20px;" onclick="showAddForm()">+ Add New Pet</button>
     </div>
 
-    <!-- HALAMAN FORM TAMBAH -->
     <div id="add-section" class="hidden">
         <h2 class="section-title">Add New Pet</h2>
         
         <div class="form-group">
-            <label for="petName">Pet Name / Tank Name</label>
-            <input type="text" id="petName" placeholder="e.g., Mochi or Tank 1">
+            <label>Pet Name</label>
+            <input type="text" id="petName" placeholder="e.g., Mochi">
         </div>
 
         <div class="form-group">
-            <label for="petType">Pet Type</label>
+            <label>Type</label>
             <select id="petType">
                 <option value="Cat">Cat</option>
                 <option value="Dog">Dog</option>
                 <option value="Fish">Fish / Aquarium</option>
                 <option value="Reptile">Reptile</option>
-                <option value="Other">Other</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="petBreed">Breed / Variant</label>
-            <input type="text" id="petBreed" placeholder="e.g., Persian or Freshwater">
+            <label>Breed / Variant</label>
+            <input type="text" id="petBreed" placeholder="e.g., Bengal Siamese">
+        </div>
+
+        <div class="form-group">
+            <label>Age (Years)</label>
+            <input type="number" id="petAge" placeholder="e.g., 2" min="0" step="0.5">
         </div>
 
         <button class="btn" onclick="savePet()">💾 Save Pet</button>
@@ -81,87 +84,111 @@
     </div>
 </div>
 
-<!-- SCRIPT LOGIKA APLIKASI -->
 <script>
-    // 1. Cek apakah ada data di Local Storage, kalau kosong, kasih data default
     let pets = JSON.parse(localStorage.getItem('myPets')) || [];
 
-    ];
+    // Fungsi Hitung Umur Manusia (Khusus Kucing & Anjing)
+    function calculateHumanAge(type, age) {
+        if (!age || age <= 0) return '';
+        if (type === 'Cat' || type === 'Dog') {
+            let humanAge = 0;
+            if (age === 1) humanAge = 15;
+            else if (age === 2) humanAge = 24;
+            else if (age > 2) humanAge = 24 + ((age - 2) * 4);
+            
+            return `<div class="age-badge">⏳ Human Age Eqv: ~${humanAge} years</div>`;
+        }
+        return '';
+    }
 
-    // 2. Fungsi untuk menampilkan data ke layar
+    // Fungsi Sistem Pakar Sederhana (Guardian Tips)
+    function generateGuardianTips(type, breed) {
+        let tips = '';
+        const breedLower = breed.toLowerCase();
+
+        if (type === 'Cat' && breedLower.includes('bengal') && breedLower.includes('siamese')) {
+            tips = `
+                <div class="tips-card">
+                    <h4>🧠 Breed Intel: Bengal Siamese Mix</h4>
+                    <p><b>Personality:</b> Highly intelligent, vocal, and requires massive stimulation. Gabungan atletis Bengal dan kecerewetan Siamese.</p>
+                    <p><b>Guardian Tip:</b> Sediakan puzzle toys atau cat wheel. Kucing ini bisa sangat destruktif kalau bosan. Perhatikan juga diet protein tingginya.</p>
+                </div>
+            `;
+        } else if (type === 'Cat') {
+            tips = `<div class="tips-card"><h4>💡 Guardian Tip</h4><p>Kucing menyembunyikan rasa sakit dengan sangat baik. Pastikan cek kebiasaan minum dan litter box hariannya.</p></div>`;
+        } else if (type === 'Fish') {
+            tips = `<div class="tips-card"><h4>💧 Guardian Tip</h4><p>Ammonia spike adalah pembunuh senyap. Pastikan jadwal water change disiplin dan filter biologis terjaga.</p></div>`;
+        }
+        return tips;
+    }
+
     function renderPets() {
         const container = document.getElementById('pet-list-container');
-        container.innerHTML = ''; // Bersihkan layar dulu
+        container.innerHTML = ''; 
 
         if (pets.length === 0) {
-            container.innerHTML = '<p class="empty-state">No pets added yet. Click the button below to add one!</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888;">No pets added. Start your guardian journey!</p>';
             return;
         }
 
-        // Loop untuk membuat kartu setiap peliharaan
         pets.forEach((pet, index) => {
-            const calendarText = encodeURIComponent(`Care for ${pet.name}`);
-            const calendarDetails = encodeURIComponent(`Routine check for ${pet.name} (${pet.type} - ${pet.breed})`);
-            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarText}&details=${calendarDetails}`;
+            const humanAgeHtml = calculateHumanAge(pet.type, parseFloat(pet.age));
+            const tipsHtml = generateGuardianTips(pet.type, pet.breed);
+            
+            // Link Kalender
+            const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Care+for+${encodeURIComponent(pet.name)}&details=Routine`;
 
             const cardHtml = `
                 <div class="pet-card">
                     <div class="pet-header">
                         <div class="pet-info">
                             <h3>${pet.name}</h3>
-                            <p>${pet.type} • ${pet.breed}</p>
+                            <p>${pet.type} • ${pet.breed} • ${pet.age ? pet.age + ' yrs' : 'Age Unknown'}</p>
+                            ${humanAgeHtml}
                         </div>
-                        <button class="btn-delete" onclick="deletePet(${index})" title="Delete Pet">❌</button>
+                        <button class="btn-delete" onclick="deletePet(${index})" title="Delete">❌</button>
                     </div>
-                    <a href="${calendarUrl}" target="_blank" class="btn btn-cal">
-                        📅 Remind in Google Calendar
-                    </a>
+                    
+                    ${tipsHtml}
+
+                    <a href="${calUrl}" target="_blank" class="btn btn-cal">📅 Remind in Calendar</a>
+                    <button class="btn btn-med" onclick="alert('Fase Berikutnya: Fitur ini akan membandingkan hasil Lab (BUN, Creatinine, dll) dengan nilai normal ras ${pet.breed}.')">🧬 Input Medical / Lab Data</button>
                 </div>
             `;
             container.innerHTML += cardHtml;
         });
     }
 
-    // 3. Fungsi untuk menyimpan data baru
     function savePet() {
-        const nameInput = document.getElementById('petName');
-        const typeInput = document.getElementById('petType');
-        const breedInput = document.getElementById('petBreed');
+        const nameInput = document.getElementById('petName').value;
+        const typeInput = document.getElementById('petType').value;
+        const breedInput = document.getElementById('petBreed').value;
+        const ageInput = document.getElementById('petAge').value;
 
-        if (!nameInput.value) {
-            alert('Please enter a pet name!');
+        if (!nameInput) {
+            alert('Pet name is required!');
             return;
         }
 
-        // Masukkan ke array
-        pets.push({
-            name: nameInput.value,
-            type: typeInput.value,
-            breed: breedInput.value || 'N/A'
-        });
-
-        // Simpan ke memory browser
+        pets.push({ name: nameInput, type: typeInput, breed: breedInput || 'Mixed', age: ageInput });
         localStorage.setItem('myPets', JSON.stringify(pets));
+        
+        document.getElementById('petName').value = '';
+        document.getElementById('petBreed').value = '';
+        document.getElementById('petAge').value = '';
 
-        // Kosongkan form setelah save
-        nameInput.value = '';
-        breedInput.value = '';
-
-        // Tampilkan layar utama yang sudah diperbarui
         renderPets();
         showHome();
     }
 
-    // 4. Fungsi untuk menghapus data
     function deletePet(index) {
-        if(confirm('Are you sure you want to delete this pet?')) {
-            pets.splice(index, 1); // Hapus 1 item dari array
-            localStorage.setItem('myPets', JSON.stringify(pets)); // Update memory
-            renderPets(); // Perbarui layar
+        if(confirm('Are you sure?')) {
+            pets.splice(index, 1);
+            localStorage.setItem('myPets', JSON.stringify(pets));
+            renderPets();
         }
     }
 
-    // Fungsi buka tutup layar
     function showAddForm() {
         document.getElementById('home-section').classList.add('hidden');
         document.getElementById('add-section').classList.remove('hidden');
@@ -172,7 +199,6 @@
         document.getElementById('home-section').classList.remove('hidden');
     }
 
-    // Jalankan fungsi render saat web pertama kali dibuka
     window.onload = renderPets;
 </script>
 </body>

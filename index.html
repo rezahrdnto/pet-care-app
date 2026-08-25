@@ -117,29 +117,30 @@
     <div class="app-header">
         <h1 class="app-title">🐾 Guardian Log</h1>
         
-        <div class="avatar-container" id="avatarContainer">
-            <img id="userAvatar" src="https://via.placeholder.com/40" alt="User Avatar" class="user-avatar">
+        <div style="display: flex; align-items: center; gap: 12px;">
             
-<!-- GREETING SECTION -->
-   <div id="greeting-box" style="margin-bottom: 25px; font-size: 16px; color: #333; display: flex; align-items: center; flex-wrap: wrap;">
-        <span id="greeting-text"></span>
-        <button id="btn-edit-name" style="background: none; border: none; color: #888; font-size: 11px; cursor: pointer; text-decoration: underline; margin-left: 8px; padding: 0;">Edit</button>
-        
-        <div id="edit-name-form" class="hidden" style="margin-top: 5px; width: 100%; display: flex; gap: 8px;">
-            <input type="text" id="input-owner-name" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 150px;">
-            <button onclick="saveOwnerName()" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-size: 12px; font-weight: bold;">Save</button>
-            <button onclick="cancelEditName()" style="background: #6c757d; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-size: 12px;">Cancel</button>
-        </div>
-    </div>
-
-            <!-- Dropdown Menu -->
-            <div id="userDropdown" class="dropdown-menu">
-                <div class="dropdown-header">
-                    <p style="margin: 0; font-size: 11px; color: #888;">Signed in as</p>
-                    <p id="dropdownEmail" class="dropdown-email">email@domain.com</p>
+            <!-- Area Sapaan & Edit Nama (Samping Kiri Avatar) -->
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                <span id="greeting-text" style="font-size: 14px; color: #444; cursor: pointer; font-weight: 600;" title="Click to edit name"></span>
+                <div id="edit-name-form" class="hidden" style="display: flex; gap: 4px; align-items: center;">
+                    <input type="text" id="input-owner-name" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; width: 110px;">
+                    <button onclick="saveOwnerName()" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">✔</button>
+                    <button onclick="cancelEditName()" style="background: #6c757d; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">✖</button>
                 </div>
-                <button class="dropdown-item" id="btnSwitchAccount">🔄 Switch Account</button>
-                <button class="dropdown-item text-danger" id="btnLogoutDrop">🚪 Logout</button>
+            </div>
+
+            <!-- Avatar & Dropdown -->
+            <div class="avatar-container" id="avatarContainer">
+                <img id="userAvatar" src="https://via.placeholder.com/40" alt="User Avatar" class="user-avatar">
+                
+                <div id="userDropdown" class="dropdown-menu">
+                    <div class="dropdown-header">
+                        <p style="margin: 0; font-size: 11px; color: #888;">Signed in as</p>
+                        <p id="dropdownEmail" class="dropdown-email">email@domain.com</p>
+                    </div>
+                    <button class="dropdown-item" id="btnSwitchAccount">🔄 Switch Account</button>
+                    <button class="dropdown-item text-danger" id="btnLogoutDrop">🚪 Logout</button>
+                </div>
             </div>
         </div>
     </div>
@@ -304,13 +305,11 @@
     const userDropdown = document.getElementById('userDropdown');
     
     avatarContainer.addEventListener('click', (e) => {
-        // Mencegah klik di dalam dropdown menutup dirinya sendiri secara gak sengaja
         if(!e.target.closest('.dropdown-menu')) {
             userDropdown.classList.toggle('show');
         }
     });
 
-    // Menutup dropdown kalau klik di tempat lain
     window.addEventListener('click', (e) => {
         if (!avatarContainer.contains(e.target)) {
             userDropdown.classList.remove('show');
@@ -318,21 +317,17 @@
     });
 
     // --- AUTHENTICATION LOGIC ---
-    
-    // Login biasa (default)
     document.getElementById('btnLogin').addEventListener('click', () => {
-        provider.setCustomParameters({ prompt: 'select_account' }); // Memaksa pilih akun
+        provider.setCustomParameters({ prompt: 'select_account' });
         signInWithPopup(auth, provider).catch(error => alert("Login gagal: " + error.message));
     });
 
-    // Switch Account dari Dropdown
     document.getElementById('btnSwitchAccount').addEventListener('click', () => {
         userDropdown.classList.remove('show');
-        provider.setCustomParameters({ prompt: 'select_account' }); // Paksa pop-up muncul
+        provider.setCustomParameters({ prompt: 'select_account' });
         signInWithPopup(auth, provider).catch(error => alert("Switch account gagal: " + error.message));
     });
 
-    // Logout
     document.getElementById('btnLogoutDrop').addEventListener('click', () => {
         userDropdown.classList.remove('show');
         signOut(auth);
@@ -341,8 +336,6 @@
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            
-            // Atur Foto Profil & Email di Dropdown
             document.getElementById('userAvatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`;
             document.getElementById('dropdownEmail').innerText = user.email;
             
@@ -357,7 +350,7 @@
     });
 
     // --- CLOUD SYNC LOGIC ---
-   async function fetchCloudData() {
+    async function fetchCloudData() {
         if (!currentUser) return;
         const docRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(docRef);
@@ -389,21 +382,21 @@
         const docRef = doc(db, "users", currentUser.uid);
         await setDoc(docRef, { pets: pets, ownerName: ownerName });
     }
+
     // --- GREETING LOGIC ---
-   window.renderGreeting = function() {
+    window.renderGreeting = function() {
         const textElement = document.getElementById('greeting-text');
         textElement.innerHTML = `Hi, <b>${ownerName}</b>`;
     };
 
-    document.getElementById('btn-edit-name').addEventListener('click', () => {
-        document.getElementById('btn-edit-name').classList.add('hidden');
+    document.getElementById('greeting-text').addEventListener('click', () => {
         document.getElementById('greeting-text').classList.add('hidden');
         document.getElementById('edit-name-form').classList.remove('hidden');
         document.getElementById('input-owner-name').value = ownerName;
+        document.getElementById('input-owner-name').focus();
     });
 
     window.cancelEditName = function() {
-        document.getElementById('btn-edit-name').classList.remove('hidden');
         document.getElementById('greeting-text').classList.remove('hidden');
         document.getElementById('edit-name-form').classList.add('hidden');
     };
@@ -412,10 +405,11 @@
         const newName = document.getElementById('input-owner-name').value.trim();
         if(newName) {
             ownerName = newName;
-            saveToCloud(); // Otomatis tembak ke Firebase
+            saveToCloud();
         }
         cancelEditName();
     };
+
     // --- RENDER UI LOGIC ---
     function formatAge(y, m, w) {
         let parts = [];
@@ -717,7 +711,6 @@
         }
     };
 
-    // Checklist bindings
     window.openAddChecklistForm = function(petId, category) {
         document.getElementById('checklistPetId').value = petId;
         document.getElementById('checklistCategory').value = category;
@@ -748,7 +741,6 @@
         saveToCloud();
     };
 
-    // Inhabitant bindings
     window.openAddInhabitantForm = function(petId) {
         document.getElementById('inhabitantPetId').value = petId;
         document.getElementById('inhName').value = '';

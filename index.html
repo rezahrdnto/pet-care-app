@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +8,14 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
-        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .pet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .pet-info h3 { margin: 0 0 5px 0; font-size: 18px; }
         .pet-info p { margin: 0; font-size: 14px; color: #666; }
-        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; margin-top: 20px; text-decoration: none; }
+        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
         .btn:hover { background-color: #218838; }
+        .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; }
+        .btn-cal:hover { background-color: #3367D6; }
         .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 10px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
     </style>
 </head>
@@ -21,29 +24,41 @@
 <div class="container">
     <h1>🐾 Pet Care Tracker</h1>
 
-    <!-- HALAMAN HOME -->
     <div id="home-section">
-        <h2 class="section-title">Peliharaan Kamu</h2>
+        <h2 class="section-title">Your Pets</h2>
         
+        <!-- Cat Card -->
         <div class="pet-card">
-            <div class="pet-info">
-                <h3>Mochi</h3>
-                <p>Kucing • Persia</p>
+            <div class="pet-header">
+                <div class="pet-info">
+                    <h3>Mochi</h3>
+                    <p>Cat • Persian</p>
+                </div>
+                <span>🟢 Healthy</span>
             </div>
-            <span>🟢 Sehat</span>
+            <!-- Google Calendar Button -->
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Feed+Mochi&details=Routine+cat+feeding+schedule" target="_blank" class="btn btn-cal">
+                📅 Remind in Google Calendar
+            </a>
         </div>
 
+        <!-- Aquarium Card -->
         <div class="pet-card">
-            <div class="pet-info">
-                <h3>Aquarium Utama</h3>
-                <p>Ikan • Air Tawar</p>
+            <div class="pet-header">
+                <div class="pet-info">
+                    <h3>Main Aquarium</h3>
+                    <p>Fish • Freshwater</p>
+                </div>
+                <span>💧 Check Water</span>
             </div>
-            <span>💧 Cek Air</span>
+            <!-- Google Calendar Button -->
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Change+Aquarium+Water&details=Routine+filter+check+and+water+change" target="_blank" class="btn btn-cal">
+                📅 Remind in Google Calendar
+            </a>
         </div>
 
-        <!-- Tombol untuk menuju form tambah data -->
-        <button class="btn" onclick="alert('Nanti ini bakal buka halaman atau modal untuk tambah peliharaan/jadwal!')">
-            + Tambah Peliharaan / Jadwal
+        <button class="btn" style="margin-top: 20px;" onclick="alert('This will open a page to add a new pet or schedule!')">
+            + Add Pet / Schedule
         </button>
     </div>
 

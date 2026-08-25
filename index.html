@@ -56,7 +56,7 @@
         /* Tombol Umum */
         .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; font-weight: bold; box-sizing: border-box; }
         .btn:hover { background-color: #218838; }
-        .btn-outline { background-color: transparent; border: 1.5px solid #28a745; color: #28a745; margin-bottom: 10px; }
+        .btn-outline { background-color: transparent; border: 1.5px solid #28a745; color: #28a745; }
         .btn-outline:hover { background-color: #eaf5eb; }
         .btn-secondary { background-color: #6c757d; }
         .btn-danger { background-color: #dc3545; margin-top: 10px; }
@@ -297,6 +297,11 @@
             const photoSrc = pet.photo ? pet.photo : 'https://via.placeholder.com/70?text=Pet';
             const isAqua = (pet.type === 'Aquarium' || pet.type === 'Fish');
             
+            // Generate Calendar Link
+            const calText = encodeURIComponent(`Routine: ${pet.name}`);
+            const calDetails = encodeURIComponent(`Checklist & Maintenance for ${pet.type}`);
+            const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calText}&details=${calDetails}`;
+
             let logsHtml = '';
             if (pet.logs && pet.logs.length > 0) {
                 const sortedLogs = [...pet.logs].reverse();
@@ -367,7 +372,13 @@
                         </div>
                         <button class="btn-delete-profile" onclick="deletePet('${pet.id}')" title="Delete Profile">🗑️</button>
                     </div>
-                    <button class="btn btn-outline" onclick="openLogForm('${pet.id}', null)">+ Add Daily Record</button>
+                    
+                    <!-- DUA TOMBOL BERSEBELAHAN (Record & Calendar) -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-outline" style="margin-bottom: 0; flex: 1; font-size: 13px;" onclick="openLogForm('${pet.id}', null)">+ Daily Record</button>
+                        <a href="${calUrl}" target="_blank" class="btn" style="background-color: #4285F4; margin-bottom: 0; flex: 1; font-size: 13px; display: flex; align-items: center; justify-content: center; text-decoration: none;">📅 Add Reminder</a>
+                    </div>
+                    
                     ${dynamicSectionsHtml}
                     <div class="timeline" style="margin-top: 20px;">
                         <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #444;">Activity & Medical History</h4>

@@ -3,123 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pet Care & Medical Tracker</title>
+    <title>Pet Guardian Tracker</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 450px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 480px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
         
-        .pet-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #fff; }
-        .pet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .pet-info h3 { margin: 0 0 5px 0; font-size: 18px; }
-        .pet-info p { margin: 0; font-size: 14px; color: #666; }
-        .age-badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px;}
+        /* Pet Card & Profile */
+        .pet-card { border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 25px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .pet-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .pet-photo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background-color: #ddd; border: 2px solid #28a745; }
+        .pet-info { flex-grow: 1; }
+        .pet-info h3 { margin: 0 0 3px 0; font-size: 18px; }
+        .pet-info p { margin: 0; font-size: 13px; color: #666; }
         
-        /* Kartu Edukasi / Guardian Tips */
-        .tips-card { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 13px; }
-        .tips-card h4 { margin: 0 0 5px 0; color: #856404; font-size: 14px; }
+        /* Timeline UI */
+        .timeline { margin-top: 15px; padding-left: 10px; border-left: 2px solid #e9ecef; }
+        .log-item { position: relative; padding-left: 15px; margin-bottom: 15px; }
+        .log-item::before { content: ''; position: absolute; left: -15px; top: 0; width: 10px; height: 10px; background: #28a745; border-radius: 50%; border: 2px solid #fff; }
+        .log-date { font-size: 12px; color: #888; font-weight: bold; display: block; margin-bottom: 2px;}
+        .log-metrics { font-size: 13px; font-weight: 600; color: #495057; display: block; margin-bottom: 4px; }
+        .log-note { font-size: 13px; color: #555; margin: 0; line-height: 1.4; background: #f8f9fa; padding: 8px; border-radius: 6px; }
         
         /* Tombol */
-        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; font-family: inherit; font-weight: bold;}
+        .btn { display: block; width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; text-decoration: none; font-weight: bold; margin-bottom: 10px; }
         .btn:hover { background-color: #218838; }
-        .btn-cal { background-color: #4285F4; margin-top: 10px; font-size: 14px; padding: 10px; font-weight: normal;}
-        .btn-cal:hover { background-color: #3367D6; }
-        .btn-med { background-color: #6f42c1; margin-top: 10px; font-size: 14px; padding: 10px; font-weight: normal;}
-        .btn-med:hover { background-color: #59339d; }
-        .btn-secondary { background-color: #6c757d; margin-top: 10px; }
+        .btn-outline { background-color: transparent; border: 1.5px solid #28a745; color: #28a745; }
+        .btn-outline:hover { background-color: #eaf5eb; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-delete { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 18px; padding: 5px; }
         
-        .btn-delete { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; padding: 0; margin-left: 10px;}
-        
+        /* Form UI */
         .section-title { font-size: 18px; margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #f4f4f9; padding-bottom: 5px; }
-        
-        /* Form */
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #444; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         
+        .photo-preview { width: 100%; height: 150px; border-radius: 8px; object-fit: cover; margin-top: 10px; display: none; border: 1px solid #ddd; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🐾 Pet Guardian App</h1>
+    <h1>🐾 Pet Guardian Log</h1>
 
+    <!-- HOME SECTION -->
     <div id="home-section">
-        <h2 class="section-title">Your Pets</h2>
         <div id="pet-list-container"></div>
-        <button class="btn" style="margin-top: 20px;" onclick="showAddForm()">+ Add New Pet</button>
+        <button class="btn" style="margin-top: 20px;" onclick="showSection('add-pet-section')">+ Add New Pet</button>
     </div>
 
-    <div id="add-section" class="hidden">
+    <!-- ADD PET SECTION -->
+    <div id="add-pet-section" class="hidden">
         <h2 class="section-title">Add New Pet</h2>
         
+        <div class="form-group">
+            <label>Photo (Max 2MB)</label>
+            <input type="file" id="petPhotoInput" accept="image/*" onchange="previewPhoto(event, 'newPetPhotoPreview')">
+            <img id="newPetPhotoPreview" class="photo-preview" src="">
+        </div>
+
         <div class="form-group">
             <label>Pet Name</label>
             <input type="text" id="petName" placeholder="e.g., Mochi">
         </div>
-
         <div class="form-group">
-            <label>Type</label>
-            <select id="petType">
-                <option value="Cat">Cat</option>
-                <option value="Dog">Dog</option>
-                <option value="Fish">Fish / Aquarium</option>
-                <option value="Reptile">Reptile</option>
-            </select>
+            <label>Type & Breed</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="petType" style="width: 40%;">
+                    <option value="Cat">Cat</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Fish">Fish</option>
+                    <option value="Reptile">Reptile</option>
+                </select>
+                <input type="text" id="petBreed" placeholder="Breed (e.g., Bengal Siamese)" style="width: 60%;">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>Breed / Variant</label>
-            <input type="text" id="petBreed" placeholder="e.g., Bengal Siamese">
-        </div>
-
-        <div class="form-group">
-            <label>Age (Years)</label>
-            <input type="number" id="petAge" placeholder="e.g., 2" min="0" step="0.5">
-        </div>
-
-        <button class="btn" onclick="savePet()">💾 Save Pet</button>
-        <button class="btn btn-secondary" onclick="showHome()">❌ Cancel</button>
+        <button class="btn" onclick="savePet()">💾 Save Pet Profile</button>
+        <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
     </div>
+
+    <!-- ADD LOG SECTION (Form untuk catat berat/umur/medis harian) -->
+    <div id="add-log-section" class="hidden">
+        <h2 class="section-title" id="log-title">Add Update for Pet</h2>
+        <input type="hidden" id="activePetId">
+        
+        <div class="form-group" style="display: flex; gap: 10px;">
+            <div style="width: 50%;">
+                <label>Age (Years/Months)</label>
+                <input type="text" id="logAge" placeholder="e.g., 2 yrs 3 mo">
+            </div>
+            <div style="width: 50%;">
+                <label>Weight (Kg/Gr)</label>
+                <input type="text" id="logWeight" placeholder="e.g., 4.5 Kg">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Condition / Medical Notes</label>
+            <textarea id="logNote" rows="3" placeholder="e.g., Makan lahap, baru dikasih obat cacing..."></textarea>
+        </div>
+
+        <button class="btn" onclick="saveLog()">📝 Save Update</button>
+        <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
+    </div>
+
 </div>
 
 <script>
-    let pets = JSON.parse(localStorage.getItem('myPets')) || [];
+    // Struktur Data Baru: ID unik dan Array Logs di dalam setiap Pet
+    let pets = JSON.parse(localStorage.getItem('guardianPets')) || [];
+    let tempPhotoBase64 = "";
 
-    // Fungsi Hitung Umur Manusia (Khusus Kucing & Anjing)
-    function calculateHumanAge(type, age) {
-        if (!age || age <= 0) return '';
-        if (type === 'Cat' || type === 'Dog') {
-            let humanAge = 0;
-            if (age === 1) humanAge = 15;
-            else if (age === 2) humanAge = 24;
-            else if (age > 2) humanAge = 24 + ((age - 2) * 4);
-            
-            return `<div class="age-badge">⏳ Human Age Eqv: ~${humanAge} years</div>`;
-        }
-        return '';
-    }
-
-    // Fungsi Sistem Pakar Sederhana (Guardian Tips)
-    function generateGuardianTips(type, breed) {
-        let tips = '';
-        const breedLower = breed.toLowerCase();
-
-        if (type === 'Cat' && breedLower.includes('bengal') && breedLower.includes('siamese')) {
-            tips = `
-                <div class="tips-card">
-                    <h4>🧠 Breed Intel: Bengal Siamese Mix</h4>
-                    <p><b>Personality:</b> Highly intelligent, vocal, and requires massive stimulation. Gabungan atletis Bengal dan kecerewetan Siamese.</p>
-                    <p><b>Guardian Tip:</b> Sediakan puzzle toys atau cat wheel. Kucing ini bisa sangat destruktif kalau bosan. Perhatikan juga diet protein tingginya.</p>
-                </div>
-            `;
-        } else if (type === 'Cat') {
-            tips = `<div class="tips-card"><h4>💡 Guardian Tip</h4><p>Kucing menyembunyikan rasa sakit dengan sangat baik. Pastikan cek kebiasaan minum dan litter box hariannya.</p></div>`;
-        } else if (type === 'Fish') {
-            tips = `<div class="tips-card"><h4>💧 Guardian Tip</h4><p>Ammonia spike adalah pembunuh senyap. Pastikan jadwal water change disiplin dan filter biologis terjaga.</p></div>`;
-        }
-        return tips;
+    // Fungsi konversi foto ke string (Base64) biar bisa disimpan di memori HP
+    function previewPhoto(event, previewId) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            tempPhotoBase64 = e.target.result;
+            const imgEl = document.getElementById(previewId);
+            imgEl.src = tempPhotoBase64;
+            imgEl.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
     }
 
     function renderPets() {
@@ -127,76 +137,147 @@
         container.innerHTML = ''; 
 
         if (pets.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888;">No pets added. Start your guardian journey!</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888;">No pets tracked yet. Start building your log!</p>';
             return;
         }
 
         pets.forEach((pet, index) => {
-            const humanAgeHtml = calculateHumanAge(pet.type, parseFloat(pet.age));
-            const tipsHtml = generateGuardianTips(pet.type, pet.breed);
+            // Render Foto (kalau ada)
+            const photoSrc = pet.photo ? pet.photo : 'https://via.placeholder.com/70?text=Pet';
             
-            // Link Kalender
-            const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Care+for+${encodeURIComponent(pet.name)}&details=Routine`;
+            // Render Timeline Logs
+            let logsHtml = '';
+            if (pet.logs && pet.logs.length > 0) {
+                // Urutkan log dari yang terbaru
+                const sortedLogs = [...pet.logs].reverse();
+                sortedLogs.forEach(log => {
+                    logsHtml += `
+                        <div class="log-item">
+                            <span class="log-date">${log.date}</span>
+                            <span class="log-metrics">Age: ${log.age || '-'} | Weight: ${log.weight || '-'}</span>
+                            <p class="log-note">${log.note}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                logsHtml = `<p style="font-size: 12px; color: #999; margin-left: 10px;">No updates logged yet.</p>`;
+            }
 
             const cardHtml = `
                 <div class="pet-card">
                     <div class="pet-header">
+                        <img src="${photoSrc}" class="pet-photo" alt="Photo">
                         <div class="pet-info">
                             <h3>${pet.name}</h3>
-                            <p>${pet.type} • ${pet.breed} • ${pet.age ? pet.age + ' yrs' : 'Age Unknown'}</p>
-                            ${humanAgeHtml}
+                            <p>${pet.type} • ${pet.breed}</p>
                         </div>
-                        <button class="btn-delete" onclick="deletePet(${index})" title="Delete">❌</button>
+                        <button class="btn-delete" onclick="deletePet('${pet.id}')" title="Delete Profile">🗑️</button>
                     </div>
                     
-                    ${tipsHtml}
-
-                    <a href="${calUrl}" target="_blank" class="btn btn-cal">📅 Remind in Calendar</a>
-                    <button class="btn btn-med" onclick="alert('Fase Berikutnya: Fitur ini akan membandingkan hasil Lab (BUN, Creatinine, dll) dengan nilai normal ras ${pet.breed}.')">🧬 Input Medical / Lab Data</button>
+                    <button class="btn btn-outline" onclick="openLogForm('${pet.id}', '${pet.name}')">+ Add Update / Condition</button>
+                    
+                    <div class="timeline">
+                        ${logsHtml}
+                    </div>
                 </div>
             `;
             container.innerHTML += cardHtml;
         });
     }
 
+    // Fungsi Simpan Profil Hewan Baru
     function savePet() {
-        const nameInput = document.getElementById('petName').value;
-        const typeInput = document.getElementById('petType').value;
-        const breedInput = document.getElementById('petBreed').value;
-        const ageInput = document.getElementById('petAge').value;
+        const name = document.getElementById('petName').value;
+        const type = document.getElementById('petType').value;
+        const breed = document.getElementById('petBreed').value;
 
-        if (!nameInput) {
-            alert('Pet name is required!');
-            return;
-        }
+        if (!name) return alert('Name is required!');
 
-        pets.push({ name: nameInput, type: typeInput, breed: breedInput || 'Mixed', age: ageInput });
-        localStorage.setItem('myPets', JSON.stringify(pets));
+        const newPet = {
+            id: Date.now().toString(), // ID unik
+            name: name,
+            type: type,
+            breed: breed || 'Mixed',
+            photo: tempPhotoBase64,
+            logs: []
+        };
+
+        pets.push(newPet);
+        saveData();
         
+        // Reset Form
         document.getElementById('petName').value = '';
         document.getElementById('petBreed').value = '';
-        document.getElementById('petAge').value = '';
+        document.getElementById('newPetPhotoPreview').style.display = 'none';
+        tempPhotoBase64 = "";
 
-        renderPets();
-        showHome();
+        showSection('home-section');
     }
 
-    function deletePet(index) {
-        if(confirm('Are you sure?')) {
-            pets.splice(index, 1);
-            localStorage.setItem('myPets', JSON.stringify(pets));
-            renderPets();
+    // Fungsi Buka Form Log Update
+    function openLogForm(petId, petName) {
+        document.getElementById('activePetId').value = petId;
+        document.getElementById('log-title').innerText = `Update for ${petName}`;
+        showSection('add-log-section');
+    }
+
+    // Fungsi Simpan Log Harian
+    function saveLog() {
+        const petId = document.getElementById('activePetId').value;
+        const age = document.getElementById('logAge').value;
+        const weight = document.getElementById('logWeight').value;
+        const note = document.getElementById('logNote').value;
+
+        if (!note && !weight && !age) return alert('Please input at least one data (Weight/Age/Note)');
+
+        const petIndex = pets.findIndex(p => p.id === petId);
+        if (petIndex === -1) return;
+
+        // Dapatkan format tanggal cantik (misal: 25 Aug 2026)
+        const dateObj = new Date();
+        const dateString = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        const newLog = {
+            id: Date.now().toString(),
+            date: dateString,
+            age: age,
+            weight: weight,
+            note: note
+        };
+
+        // Masukkan log baru ke dalam array logs milik hewan tersebut
+        if (!pets[petIndex].logs) pets[petIndex].logs = [];
+        pets[petIndex].logs.push(newLog);
+
+        saveData();
+        
+        // Reset Form Log
+        document.getElementById('logAge').value = '';
+        document.getElementById('logWeight').value = '';
+        document.getElementById('logNote').value = '';
+
+        showSection('home-section');
+    }
+
+    function deletePet(id) {
+        if(confirm('Delete this pet and all its logs?')) {
+            pets = pets.filter(p => p.id !== id);
+            saveData();
         }
     }
 
-    function showAddForm() {
-        document.getElementById('home-section').classList.add('hidden');
-        document.getElementById('add-section').classList.remove('hidden');
+    function saveData() {
+        localStorage.setItem('guardianPets', JSON.stringify(pets));
+        renderPets();
     }
 
-    function showHome() {
-        document.getElementById('add-section').classList.add('hidden');
-        document.getElementById('home-section').classList.remove('hidden');
+    // Navigasi Halaman Single Page
+    function showSection(sectionId) {
+        document.getElementById('home-section').classList.add('hidden');
+        document.getElementById('add-pet-section').classList.add('hidden');
+        document.getElementById('add-log-section').classList.add('hidden');
+        
+        document.getElementById(sectionId).classList.remove('hidden');
     }
 
     window.onload = renderPets;

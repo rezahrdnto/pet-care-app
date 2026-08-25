@@ -84,10 +84,10 @@
     <!-- HOME SECTION -->
     <div id="home-section">
         <div id="pet-list-container"></div>
-        <button class="btn" style="margin-top: 20px;" onclick="showSection('add-pet-section')">+ Add New Pet / Aquarium</button>
+        <button class="btn" style="margin-top: 20px;" onclick="showSection('add-pet-section')">+ Add New Profile</button>
     </div>
 
-    <!-- ADD PET SECTION -->
+    <!-- ADD PET/AQUARIUM SECTION -->
     <div id="add-pet-section" class="hidden">
         <h2 class="section-title">Add Profile</h2>
         <div class="form-group">
@@ -110,9 +110,38 @@
         </div>
         <div class="form-group">
             <label id="label-petBreed">Breed / Variant</label>
-            <input type="text" id="petBreed" placeholder="e.g., Persian or Freshwater Aquascape">
+            <input type="text" id="petBreed" placeholder="e.g., Persian or Freshwater">
         </div>
         <button class="btn" onclick="savePet()" style="margin-bottom: 10px;">💾 Save Profile</button>
+        <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
+    </div>
+
+    <!-- ADD INHABITANT SECTION (KHUSUS AQUARIUM) -->
+    <div id="add-inhabitant-section" class="hidden">
+        <h2 class="section-title">Add Fish / Species</h2>
+        <input type="hidden" id="inhabitantPetId">
+        <div class="form-group">
+            <label>Species Name</label>
+            <input type="text" id="inhName" placeholder="e.g., Neon Tetra, Corydoras">
+        </div>
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="inhQty" placeholder="e.g., 5" min="1">
+        </div>
+        <button class="btn" onclick="saveInhabitant()" style="margin-bottom: 10px;">💾 Add Species</button>
+        <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
+    </div>
+
+    <!-- ADD CHECKLIST SECTION -->
+    <div id="add-checklist-section" class="hidden">
+        <h2 class="section-title">Add Routine / Task</h2>
+        <input type="hidden" id="checklistPetId">
+        <input type="hidden" id="checklistCategory">
+        <div class="form-group">
+            <label>Task Name</label>
+            <input type="text" id="checklistTaskName" placeholder="e.g., Kuras 30%, Vaksin F3, Obat Cacing">
+        </div>
+        <button class="btn" onclick="saveChecklist()" style="margin-bottom: 10px;">💾 Add Task</button>
         <button class="btn btn-secondary" onclick="showSection('home-section')">❌ Cancel</button>
     </div>
 
@@ -122,7 +151,6 @@
         <input type="hidden" id="activePetId">
         <input type="hidden" id="activeLogId">
         
-        <!-- Grup Log Mammal/Reptile -->
         <div id="mammal-group">
             <div class="form-group">
                 <label>Age (Years / Months / Weeks)</label>
@@ -138,7 +166,6 @@
             </div>
         </div>
 
-        <!-- Grup Log Aquarium -->
         <div id="aqua-group" class="hidden">
             <div class="form-group" style="display: flex; gap: 10px;">
                 <div style="width: 50%;">
@@ -152,7 +179,6 @@
             </div>
         </div>
 
-        <!-- Grup Log BCS -->
         <div class="form-group hidden" id="bcs-group">
             <label>Body Condition Score (1-9)</label>
             <select id="logBCS">
@@ -167,12 +193,11 @@
                 <option value="8">8 - Obese</option>
                 <option value="9">9 - Severely Obese</option>
             </select>
-            <span class="helper-text">💡 <b>Cheat Sheet:</b><br><b>1-3:</b> Rusuk kelihatan jelas.<br><b>4-5 (Ideal):</b> Rusuk gak kelihatan, tapi gampang diraba.<br><b>6-9:</b> Rusuk susah diraba tertutup lemak.</span>
         </div>
 
         <div class="form-group">
             <label>Condition / Medical Notes</label>
-            <textarea id="logNote" rows="3" placeholder="e.g., Kucing makan lahap ATAU Ganti air 30% karena amonia naik..."></textarea>
+            <textarea id="logNote" rows="3" placeholder="e.g., Makan lahap, atau kondisi air keruh..."></textarea>
         </div>
 
         <button class="btn" onclick="saveLog()" style="margin-bottom: 10px;">📝 Save Update</button>
@@ -186,7 +211,6 @@
     let pets = JSON.parse(localStorage.getItem('guardianPets')) || [];
     let tempPhotoBase64 = "";
 
-    // Ganti label pas milih Aquarium
     function updateAddFormLabels() {
         const type = document.getElementById('petType').value;
         if(type === 'Aquarium') {
@@ -204,9 +228,8 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             tempPhotoBase64 = e.target.result;
-            const imgEl = document.getElementById(previewId);
-            imgEl.src = tempPhotoBase64;
-            imgEl.style.display = 'block';
+            document.getElementById(previewId).src = tempPhotoBase64;
+            document.getElementById(previewId).style.display = 'block';
         };
         reader.readAsDataURL(file);
     }
@@ -227,7 +250,6 @@
         return `<span class="human-age">Eqv. Human: ~${Math.round(hAge * 10) / 10} yrs</span><br>`;
     }
 
-    // Fungsi Builder Checklist Dinamis
     function renderChecklistBlock(pet, category, title) {
         let items = (pet.checklist || []).filter(i => {
             if (category === 'general') return !i.category || i.category === 'general';
@@ -255,7 +277,7 @@
             <div class="checklist-section">
                 <div class="checklist-header">
                     <h4>${title}</h4>
-                    <button class="btn-edit-log" onclick="addChecklist('${pet.id}', '${category}')">+ Add</button>
+                    <button class="btn-edit-log" onclick="openAddChecklistForm('${pet.id}', '${category}')">+ Add</button>
                 </div>
                 ${listHtml}
             </div>
@@ -275,13 +297,11 @@
             const photoSrc = pet.photo ? pet.photo : 'https://via.placeholder.com/70?text=Pet';
             const isAqua = (pet.type === 'Aquarium' || pet.type === 'Fish');
             
-            // Render Logs / Timeline
             let logsHtml = '';
             if (pet.logs && pet.logs.length > 0) {
                 const sortedLogs = [...pet.logs].reverse();
                 sortedLogs.forEach(log => {
                     let metricsContent = '';
-                    
                     if (isAqua) {
                         metricsContent = `<span class="aqua-badge">Temp: ${log.temp || '-'}</span> <span class="aqua-badge">pH: ${log.ph || '-'}</span>`;
                     } else {
@@ -310,11 +330,9 @@
                 logsHtml = `<p style="font-size: 12px; color: #999; margin-left: 10px;">No records yet.</p>`;
             }
 
-            // Render Specific Sections
             let dynamicSectionsHtml = '';
             
             if (isAqua) {
-                // Inhabitants Logic
                 let inhabList = '';
                 if (pet.inhabitants && pet.inhabitants.length > 0) {
                     pet.inhabitants.forEach(inh => {
@@ -328,7 +346,7 @@
                     <div class="inhabitants-section">
                         <div class="checklist-header">
                             <h4>🐠 Inhabitants / Species</h4>
-                            <button class="btn-edit-log" onclick="addInhabitant('${pet.id}')">+ Add</button>
+                            <button class="btn-edit-log" onclick="openAddInhabitantForm('${pet.id}')">+ Add</button>
                         </div>
                         <div class="inhabitant-tags">${inhabList}</div>
                     </div>
@@ -349,11 +367,8 @@
                         </div>
                         <button class="btn-delete-profile" onclick="deletePet('${pet.id}')" title="Delete Profile">🗑️</button>
                     </div>
-                    
                     <button class="btn btn-outline" onclick="openLogForm('${pet.id}', null)">+ Add Daily Record</button>
-                    
                     ${dynamicSectionsHtml}
-
                     <div class="timeline" style="margin-top: 20px;">
                         <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #444;">Activity & Medical History</h4>
                         ${logsHtml}
@@ -364,33 +379,50 @@
         });
     }
 
-    // --- Inhabitants Logic (Aquarium) ---
-    function addInhabitant(petId) {
-        const name = prompt("Species Name (e.g., Neon Tetra):");
-        if (!name) return;
-        const qty = prompt("Quantity (e.g., 5):") || 1;
-
+    // --- FORM LOGIC: INHABITANTS ---
+    function openAddInhabitantForm(petId) {
+        document.getElementById('inhabitantPetId').value = petId;
+        document.getElementById('inhName').value = '';
+        document.getElementById('inhQty').value = '';
+        showSection('add-inhabitant-section');
+    }
+    function saveInhabitant() {
+        const petId = document.getElementById('inhabitantPetId').value;
+        const name = document.getElementById('inhName').value;
+        const qty = document.getElementById('inhQty').value || 1;
+        if (!name) return alert('Masukkan nama spesies!');
+        
         const pet = pets.find(p => p.id === petId);
         if (!pet.inhabitants) pet.inhabitants = [];
         pet.inhabitants.push({ id: Date.now().toString(), name: name, qty: qty });
         saveData();
+        showSection('home-section');
     }
     function deleteInhabitant(petId, inhId) {
-        if(!confirm('Hapus spesies ini dari tank?')) return;
+        if(!confirm('Hapus spesies ini?')) return;
         const pet = pets.find(p => p.id === petId);
         pet.inhabitants = pet.inhabitants.filter(i => i.id !== inhId);
         saveData();
     }
 
-    // --- Checklist Logic ---
-    function addChecklist(petId, category) {
-        const text = prompt("Masukkan tugas / checklist baru:");
-        if (!text) return;
+    // --- FORM LOGIC: CHECKLIST ---
+    function openAddChecklistForm(petId, category) {
+        document.getElementById('checklistPetId').value = petId;
+        document.getElementById('checklistCategory').value = category;
+        document.getElementById('checklistTaskName').value = '';
+        showSection('add-checklist-section');
+    }
+    function saveChecklist() {
+        const petId = document.getElementById('checklistPetId').value;
+        const category = document.getElementById('checklistCategory').value;
+        const text = document.getElementById('checklistTaskName').value;
+        if (!text) return alert('Masukkan nama tugas!');
 
         const pet = pets.find(p => p.id === petId);
         if (!pet.checklist) pet.checklist = [];
         pet.checklist.push({ id: Date.now().toString(), text: text, done: false, category: category });
         saveData();
+        showSection('home-section');
     }
     function toggleChecklist(petId, itemId) {
         const pet = pets.find(p => p.id === petId);
@@ -399,23 +431,21 @@
         saveData();
     }
     function deleteChecklist(petId, itemId) {
-        if(!confirm('Hapus item ini?')) return;
+        if(!confirm('Hapus tugas ini?')) return;
         const pet = pets.find(p => p.id === petId);
         pet.checklist = pet.checklist.filter(i => i.id !== itemId);
         saveData();
     }
 
-    // --- Main Core Logic ---
+    // --- MAIN LOGIC ---
     function savePet() {
         const name = document.getElementById('petName').value;
         const type = document.getElementById('petType').value;
         const breed = document.getElementById('petBreed').value;
-
         if (!name) return alert('Name/Tank Name is required!');
 
         pets.push({
-            id: Date.now().toString(),
-            name: name, type: type, breed: breed || 'Mixed/Standard',
+            id: Date.now().toString(), name: name, type: type, breed: breed || 'Mixed/Standard',
             photo: tempPhotoBase64, logs: [], checklist: [], inhabitants: []
         });
 
@@ -423,7 +453,7 @@
         document.getElementById('petName').value = '';
         document.getElementById('petBreed').value = '';
         document.getElementById('newPetPhotoPreview').style.display = 'none';
-        document.getElementById('petType').value = 'Cat'; // Reset to default
+        document.getElementById('petType').value = 'Cat';
         tempPhotoBase64 = "";
         showSection('home-section');
     }
@@ -431,11 +461,9 @@
     function openLogForm(petId, logId = null) {
         document.getElementById('activePetId').value = petId;
         document.getElementById('activeLogId').value = logId || '';
-        
         const pet = pets.find(p => p.id === petId);
         document.getElementById('log-title').innerText = logId ? `Edit Record: ${pet.name}` : `New Record: ${pet.name}`;
         
-        // Atur Tampilan Form Berdasarkan Tipe
         const isAqua = (pet.type === 'Aquarium' || pet.type === 'Fish');
         if (isAqua) {
             document.getElementById('mammal-group').classList.add('hidden');
@@ -500,9 +528,7 @@
 
         if (logId) {
             const logIndex = pets[petIndex].logs.findIndex(l => l.id === logId);
-            if (logIndex !== -1) {
-                pets[petIndex].logs[logIndex] = { ...pets[petIndex].logs[logIndex], ...newLogData };
-            }
+            if (logIndex !== -1) pets[petIndex].logs[logIndex] = { ...pets[petIndex].logs[logIndex], ...newLogData };
         } else {
             newLogData.id = Date.now().toString();
             newLogData.date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -536,7 +562,10 @@
     function showSection(sectionId) {
         document.getElementById('home-section').classList.add('hidden');
         document.getElementById('add-pet-section').classList.add('hidden');
+        document.getElementById('add-inhabitant-section').classList.add('hidden');
+        document.getElementById('add-checklist-section').classList.add('hidden');
         document.getElementById('add-log-section').classList.add('hidden');
+        
         document.getElementById(sectionId).classList.remove('hidden');
     }
 
